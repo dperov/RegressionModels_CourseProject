@@ -1,0 +1,123 @@
+---
+title: "Regression Model Course Project"
+author: "Dmitri Perov"
+date: "January 28, 2016"
+output: pdf_document
+---
+#Executive Summary
+
+In this project we explored the relationship  between a set of variables and miles per gallon (MPG) in the mtcars dataset and answered the following questions: 
+
+* Is an automatic or manual transmission better for MPG
+* Quantify the MPG difference between automatic and manual transmissions
+
+First, we made some exploratory data analyses and fit simple linear model.
+
+Simplest model explains only 34% of total data variability and then can not be considered as good. 
+
+Then more complex models had been tested. It had been found that other variables, especially car weight and qsec parameter (1/4 mile time), have a significant impact to MPG.
+
+This model showed that if we compare cars with similar weight and performance (qsec parameter), then a car with manual transmission has in average 2.8 better mpg (with 95% confidence interval from 0.04 to 5.83 mpg) 
+
+The conclusion can be made that manual transmission is better for MPG.
+
+#Analisys
+```{r, echo=FALSE}
+require(datasets)
+require(ggplot2)
+#require(plyr)
+#load dataset mtcars
+attach(mtcars)
+```
+
+First investigate relationship of MPG and transmission type disregarding all other variables.
+
+```{r}
+auto <- mtcars[mtcars$am==0,]$mpg 
+manual <- mtcars[mtcars$am==1,]$mpg
+summary(auto)
+summary(manual)
+
+test <- t.test(auto, manual)
+test$conf.int
+
+```
+
+Result shows that there is a significant impact (pvalue: `r test$p.value`) of the transmission type to MPG.
+
+
+Evaluate a simple linear model that considers transmission type only.
+
+```{r Models}
+fit0 <-lm(mpg~factor(am),mtcars)
+summary(fit0)
+confint(fit0)
+```
+
+
+This simple model explains only 34% (Adjusted R-squared value) of the total variation and can not be considered as a good model.
+
+
+Let's try to select set of other variables from the dataset that have significant impact to MPG.
+
+Fit multivariate model with all the dataset variables as a factor and
+examine the model coefficient. More influential variable has a larger absolute value of the slope coefficient.
+
+
+```{r}
+fit1 <- lm(mpg~., data = mtcars)
+fit1$coefficient[order(abs(fit1$coefficient), decreasing = TRUE)]
+
+```
+
+Here we see that variable wt and qsec has comparable impact to MPG.
+Build another model including these variables as factors.
+
+```{r}
+fit3 <- lm(mpg ~ factor(am) + wt + qsec, data = mtcars)
+summary(fit3)
+confint(fit3)
+```
+
+This model explains 85% of data variability (Adjusted R-squared value) and can be considered as a good one.
+The interpretation of model coefficient may be the follows:
+
+If we compare cars with similar weight and performance (qsec param), then a car with manual transmission has in average 2.8 better mpg (with 95% confidence interval from 0.04 to 5.83 mpg) 
+
+Figure3 shows the diagnostic plots of the model. There are no signs of
+patterns or Heteroskedasticity in the data.
+
+
+#Appendix
+
+
+###Figure 1
+```{r, echo=FALSE}
+ggplot(data=mtcars, aes(x=factor(am), y=mpg, fill=factor(am))) +
+        geom_violin() +
+        ylab('mpg') + 
+        xlab('Transmission type (0=auto)') + 
+        ggtitle('mpg vs transmission type')
+```
+
+
+###Figure 2
+```{r, echo=FALSE}
+plot(mtcars$am, mtcars$mpg,
+        xlab="Transmission type (0=auto)",
+        ylab="mpg",
+        main="Simple regression mpg vs transmission type",
+        col="black",
+        cex=1.1, pch=21, frame=F)
+abline(fit0,lwd=2)
+```
+
+
+###Figure 3
+```{r, echo=FALSE}
+par(mfrow = c(2, 3))
+plot(fit3,which=1:6)
+```
+
+Markdown source: 
+("https://github.com/dperov/RegressionModels_CourseProject/blob/master/Project.Rmd")
