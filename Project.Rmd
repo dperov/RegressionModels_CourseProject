@@ -1,5 +1,5 @@
 ---
-title: "Regression Model Course Project"
+title: "Regression Models Course Project"
 author: "Dmitri Perov"
 date: "January 28, 2016"
 output: pdf_document
@@ -119,5 +119,5 @@ par(mfrow = c(2, 3))
 plot(fit3,which=1:6)
 ```
 
-Markdown source: 
+Markdown source
 ("https://github.com/dperov/RegressionModels_CourseProject/blob/master/Project.Rmd")
